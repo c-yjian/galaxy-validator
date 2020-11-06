@@ -8,8 +8,8 @@ class UidValidator extends GalaxyValidator{
         super();
         this.uid = new Rule([
             {required:true},
-            {type:'isInt', message:'请输入数字'},
-            {type:'isLength', message:'至少5个字符，最多10个字符', options:{min:5,max:10}},
+            {type:'isInt', message:'请输入最小为90的数字', options:{min:90}},
+            {type:'isLength', message:'至少2个字符，最多10个字符', options:{min:2,max:10}},
         ]);
     }
     

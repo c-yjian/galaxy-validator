@@ -4,6 +4,7 @@ const app = new Koa();
 const router = new Router();
 const { catchError } = require('./globalError')
 const { UidValidator } = require('./validator/uid');
+const { EmployeeValidator } = require('./validator/employee');
 
 router.get('/', async(ctx, next)=>{
     console.count('root:');
@@ -15,10 +16,11 @@ router.get('/user', async(ctx, next)=>{
         const galaxy = await new UidValidator().validate(ctx);
         console.log(galaxy.get('query.uid'));
         console.log(ctx.galaxy.get('pool.pageInfo'));
+        ctx.body = ctx.galaxy.get('query.uid');
     } catch (error) {
         console.log(error)
+        ctx.body =error;
     }
-    ctx.body = ctx.galaxy.get('query.uid');
     // or
     // const validator = new UidValidator();
     // validator.validate(ctx).then(galaxy=>{
@@ -29,6 +31,22 @@ router.get('/user', async(ctx, next)=>{
     // }, err=>{
     //     console.log(err)
     // });
+});
+
+// employee?age=20&name='yangjian'
+router.get('/employee', async(ctx, next)=>{
+    try {
+        const galaxy = await new EmployeeValidator().validate(ctx);
+        const age = galaxy.get('query.age');
+        const name = galaxy.get('query.name');
+        ctx.body =`
+        age: ${age}
+        name: ${name}
+        `;
+    } catch (error) {
+        console.log(error)
+        ctx.body =error;
+    }
 });
 
 app.use(catchError);

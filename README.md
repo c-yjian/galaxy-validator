@@ -119,7 +119,7 @@ ctx.galaxy is a hook provided by the validator. You can also switch to other key
 
 ```
 router.get('/info', async(ctx, next)=>{
-    await new accountValidator().validate(ctx, '', youKey);
+    await new accountValidator().validate(ctx, '', yourKey);
 })
 ```
 
@@ -189,6 +189,79 @@ this.id = [
         ]),
     ]
 ```
+
+## Inherit validator
+There is a basic validator for validate age.This is probably going to be checked in a lot of places.
+We can wrap it as a base class for other classes to inherit from
+
+```
+// validate age, in this case a required field, as a positive integer within the [18,120] range
+class AgeValidator extends GalaxyValidator{
+    constructor() {
+        super()
+        this.age = new Rule([
+            {
+                required:true,
+                message:'age is a required field',
+            },{
+                type:'isInt', 
+                message:'The age should be between 18 and 120 positive integers',
+                options:{
+                    min: 18,
+                    max:120
+                }
+            }
+        ])
+    }
+}
+```
+```
+
+// Here we inherit the AgeValidator
+// Indicates that the EmployeeValidator requires age compliance, and that the name field is additionally validated on top of that
+class EmployeeValidator extends AgeValidator{
+    constructor(){
+        super()
+        this.name = new Rule([
+            {
+                required:true,
+                message:'Name is a required field',
+            },{
+                type:'isLength', 
+                message:'At least 2 characters and a maximum of 10 characters', 
+                options:{min:2,max:10}
+            },
+        ]);
+    }
+}
+module.exports = {
+    EmployeeValidator
+}
+```
+
+your api.js
+```
+// employee?age=20&name='yangjian'
+router.get('/employee', async(ctx, next)=>{
+    try {
+        const galaxy = await new EmployeeValidator().validate(ctx);
+        const age = galaxy.get('query.age');
+        const name = galaxy.get('query.name');
+        ctx.body =`
+        age: ${age}
+        name: ${name}
+        `;
+    } catch (error) {
+        console.log(error)
+        ctx.body =error;
+    }
+});
+```
+
+if your requestis  server.../employee?age=-128&name='yangjian'
+you will get the error message
+![image](./src/img/err-3.png)
+
 
 ## demo online
 https://codesandbox.io/s/galaxy-validator-7ml16?file=/src/index.js
