@@ -6,10 +6,9 @@ Also the validation rule itself will also be validated,If the validation rule is
 it's return a promise, So you can use all the features of a promise.
 it can be use in koa、express...nodejs project。
 
-
 ## Install
 ```
-    npm install galaxy-validator
+npm install galaxy-validator
 ```
 
 ## usage
@@ -141,6 +140,7 @@ If the current value does not pass validation, you will get the details of the e
 | type    | string   |    value/function                   | Wrong type   Error of registration rule/Custom function check error |
 | filed   | string   |    the parameter/function name      | Verify the wrong parameters |
 | message | string   |    Error message description        | Error message description |
+| options | object   |     null                            |  Other configurations in the VALIDATE package |
 
 
 ## validate the rule
