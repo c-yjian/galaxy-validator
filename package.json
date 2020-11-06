@@ -17,12 +17,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@babel/runtime": "^7.12.1",
     "chalk": "^4.1.0",
     "lodash": "^4.17.20",
     "validator": "^13.1.17"
   },
   "devDependencies": {
+    "@babel/runtime": "^7.12.1",
     "@babel/core": "^7.12.3",
     "@babel/plugin-external-helpers": "^7.12.1",
     "@babel/plugin-transform-async-to-generator": "^7.12.1",
