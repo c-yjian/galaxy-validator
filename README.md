@@ -1,5 +1,7 @@
 # a best validator in Node js project
 
+[Chinese document(中文文档)](https://blog.csdn.net/weixin_38080573/article/details/109530652)
+
 ## galaxy-validator
 Small and beautiful, a compact parameter validator.You can use it to validate params in your project,
 Also the validation rule itself will also be validated,If the validation rule is wrong, an error message is printed on the console,but your service won't die.
