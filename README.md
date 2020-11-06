@@ -161,7 +161,7 @@ constructor(){
 
 The console will print out that the Required field should be a Boolean, like this
 
-![image](./src/img/err-1.png)
+![image](https://img-blog.csdnimg.cn/20201106144206116.png#pic_center)
 
 ```
 constructor(){
@@ -173,7 +173,7 @@ constructor(){
     }
 ```
 
-![image](./src/img/err-2.png)
+![image](https://img-blog.csdnimg.cn/20201106144232344.png#pic_center)
 
 ## alias
 Sometimes the variable you want to verify maps to another name, alias substitution can solve this problem. like this
@@ -262,7 +262,7 @@ router.get('/employee', async(ctx, next)=>{
 
 if your requestis  server.../employee?age=-128&name='yangjian'
 you will get the error message
-![image](./src/img/err-3.png)
+![image](https://img-blog.csdnimg.cn/20201106144308625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zODA4MDU3Mw==,size_16,color_FFFFFF,t_70#pic_center)
 
 
 ## demo online
