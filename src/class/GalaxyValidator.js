@@ -19,7 +19,8 @@ export default class GalaxyValidator {
         this.alias = {}
     }
 
-    assembleAllParams(ctx) {
+    // 聚合请求参数
+    _assembleAllParams(ctx) {
         return {
             body: ctx.request.body || {},
             query: ctx.request.query,
@@ -29,7 +30,7 @@ export default class GalaxyValidator {
         }
     }
 
-    filterParams2Validate(key) {
+    _filterParams2Validate(key) {
         // 验证validate+大写字母的方法名
         if (/^validate([A-Z])\w+/g.test(key)) {
             return true
@@ -39,44 +40,6 @@ export default class GalaxyValidator {
             return true
         }
         return false
-    }
-
-    get(path, parsed = true) {
-        if (parsed) {
-            return _.get(this.parsedData, path, null)
-        }
-        return _.get(this.rawData, path, null)
-    }
-
-    async validate(ctx, alias = {}, hook) {
-        const errorList = []
-        const params = this.assembleAllParams(ctx)
-        this.alias = alias
-        this.rawData = _.cloneDeep(params)
-        this.parsedData = _.cloneDeep(params)
-        const member2ValidateKeyList = extractAttributesFromInstance(this, {
-            filter: this.filterParams2Validate.bind(this),
-        })
-
-        for (const key of member2ValidateKeyList) {
-            const isValidateCustomFunc = typeof this[key] === 'function'
-            const result = await this._validateRuleByKey(
-                key,
-                isValidateCustomFunc,
-            )
-            if (!result.passed) {
-                errorList.push({
-                    type: isValidateCustomFunc ? 'function' : 'value',
-                    filed: key,
-                    message: result.message,
-                })
-            }
-        }
-        if (errorList.length) {
-            return Promise.reject(errorList)
-        }
-        this._mountHook(ctx, hook)
-        return Promise.resolve(this)
     }
 
     _mountHook(ctx, hook = 'galaxy') {
@@ -114,7 +77,7 @@ export default class GalaxyValidator {
         let result
         const customFun = this[key]
         try {
-            const customFunReturn = await customFun(this.rawData)
+            const customFunReturn = await customFun(this.parsedData)
             // 如果自定义函数有返回值，并且有对应的name和val的属性，将其挂载在this.parsed上
             // 后续用户可以通过 ctx.galaxy.get('pool.name')的方式获取
             if (customFunReturn && customFunReturn.key && customFunReturn.val) {
@@ -134,6 +97,50 @@ export default class GalaxyValidator {
         return result
     }
 
+    // 验证
+    async validate(ctx, alias = {}, hook) {
+        const errorList = []
+        const params = this._assembleAllParams(ctx)
+        this.alias = alias
+        this.rawData = _.cloneDeep(params)
+        this.parsedData = _.cloneDeep(params)
+        const member2ValidateKeyList = extractAttributesFromInstance(this, {
+            filter: this._filterParams2Validate.bind(this),
+        })
+        console.log(JSON.stringify(member2ValidateKeyList));
+        for (const key of member2ValidateKeyList) {
+            const isValidateCustomFunc = typeof this[key] === 'function'
+            const result = await this._validateRuleByKey(
+                key,
+                isValidateCustomFunc,
+            )
+            if (!result.passed) {
+                errorList.push({
+                    type: isValidateCustomFunc ? 'function' : 'value',
+                    filed: key,
+                    message: result.message,
+                })
+            }
+        }
+        if (errorList.length) {
+            return Promise.reject(errorList)
+        }
+        this._mountHook(ctx, hook)
+        return Promise.resolve(this)
+    }
+
+    // 用户知道变量路径来从 parsed 中获取对应的值
+    get(path, parsed = true) {
+        if (parsed) {
+            return _.get(this.parsedData, path, null)
+        }
+        return _.get(this.rawData, path, null)
+    }
+
+    /**
+     * 用户不知道路径，只知道Key就可以根据key获取对应值的信息
+     * 需要确保在请求体中的参数名唯一，否则只会返回第一个
+    */
     getValueInfo(key) {
         let value = null
         let path = []
@@ -152,4 +159,10 @@ export default class GalaxyValidator {
             path,
         }
     }
+
+    // 获取聚合之后的值，
+    getAssembleParams(parsed=true){
+        return parsed ? this.parsedData : this.rawData
+    }
+
 }

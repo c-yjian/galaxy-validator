@@ -262,3 +262,14 @@ router.get('/employee', async(ctx, next)=>{
 
 ## demo online
 https://codesandbox.io/s/galaxy-validator-7ml16?file=/src/index.js
+
+
+## todo
+
+1. 暴露getValueInfo的。当我只知道key不知道path的时候可以使用这个api。需要保证在 ['query', 'body', 'path', 'header']中不要有同名的参数。否则只会按照顺序返回查找到的第一个
+
+2. 在自定义验证函数的部分，最好使用箭头函数，以解决 'this' 的指向问题，这样使用 getValueInfo， get更加方便
+
+3. 错误返回信息中，添加 path，用于描述验证失败的字段位于请求体的位置
+
+4. 自定义验证的isSting, isArray 可以加一个min,max的长度的验证

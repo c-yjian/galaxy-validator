@@ -1,8 +1,10 @@
 const { Rule, GalaxyValidator } = require('../../dist');
 
 class AgeValidator extends GalaxyValidator{
-    constructor() {
-        super()
+    constructor(ctx) {
+        super();
+        // 业务层有特殊需求，可以将ctx传递进来
+        this.ctx = ctx;
         this.age = new Rule([
             {
                 required:true,
@@ -16,6 +18,16 @@ class AgeValidator extends GalaxyValidator{
                 }
             }
         ])
+    }
+
+    validateAge = (vals)=>{
+        return {
+            key:'ageInfo',
+            val:{
+                age:20,
+                name:'name'
+            }
+        }
     }
 }
 
@@ -32,6 +44,9 @@ class EmployeeValidator extends AgeValidator{
                 options:{min:2,max:10}
             },
         ]);
+    }
+    validateName = (vals)=>{
+        console.log(JSON.stringify(vals));
     }
 }
 

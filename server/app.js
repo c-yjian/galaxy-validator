@@ -39,6 +39,7 @@ router.get('/employee', async(ctx, next)=>{
         const galaxy = await new EmployeeValidator().validate(ctx);
         const age = galaxy.get('query.age');
         const name = galaxy.get('query.name');
+        console.log(JSON.stringify(ctx.galaxy.getAssembleParams()));
         ctx.body =`
         age: ${age}
         name: ${name}
