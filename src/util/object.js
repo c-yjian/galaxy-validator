@@ -10,7 +10,7 @@ class RuleException extends Error {
 
 // 不需要将类型转换的，一般给自定义函数验证
 class RuleResult {
-    constructor(passed, message) {
+    constructor(passed, message='error parameter') {
         this.passed = passed
         message && (this.message = message)
     }

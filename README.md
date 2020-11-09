@@ -70,6 +70,7 @@ your api.js
 
 ```
 const uIdValidator = require('./validator/uId.js);
+// user?age=20&name='yangjian'
 router.get('/user', async(ctx, next)=>{
     // galaxy is a function provide by GalaxyValidator
     try {
@@ -80,6 +81,10 @@ router.get('/user', async(ctx, next)=>{
          // or get galaxy from ctx
          console.log(ctx.galaxy.get('query.uid'));
          console.log(ctx.galaxy.get('pool.userInfo'))
+         // get all params from request head body path query
+         const assembleParams = ctx.galaxy.getAssembleParams();
+         // If you're not sure about the path of the variable you just know the key, use the getValueInfo
+         const name = ctx.galaxy.getValueInfo('name');
     } catch (error) {
          console.log(error)
     }
@@ -102,6 +107,15 @@ These custom validation rules functions need to be named with the start of 'vali
 Galaxy Validator is based on validator validation rules. The Type field in the validation Rule is what you need to validate in the Validator.
 At the same time, the validation of three basic('isString'、'isObject'、'isArray') data types and required is also extended
 
+### api
+| params   |  type    |    value                            | description    |
+|----------|----------|-------------------------------------|------------|
+| required | boolean   |    true/false                      | Whether this field is a required field |
+| message  | string   |    'error parameter'                | Error message prompted when validation fails |
+| type     | string   |    Refer to the Validator validation type + ['isString', 'isObject', 'isArray'] three data types| Verify the category |
+| options  | string   |    Refer to validator for options | The configuration passed to the Validator |
+
+[package validate](https://www.npmjs.com/package/validator)
 
 ## validate the value
 
@@ -142,8 +156,7 @@ If the current value does not pass validation, you will get the details of the e
 | type    | string   |    value/function                   | Wrong type   Error of registration rule/Custom function check error |
 | filed   | string   |    the parameter/function name      | Verify the wrong parameters |
 | message | string   |    Error message description        | Error message description |
-| options | object   |     null                            |  Other configurations in the VALIDATE package |
-
+| path    | string   |    like: "query.age"                | If it is a field, the error parameter location is exposed, and the custom function verification error is null |
 
 ## validate the rule
 The validator also validates the rule itself and prints the error in the console if the validation rule goes wrong
@@ -215,6 +228,22 @@ class AgeValidator extends GalaxyValidator{
             }
         ])
     }
+
+    // For asynchronous verification, you just need to add 'Async'
+    validateAge = (vals)=>{
+        const age = vals.query.age;
+        if('Verification failed'){
+            throw new Error('error message...')
+        }
+        // Validate passed and mount ageInfo in the data pool provided by Galaxy for easy retrieval elsewhere
+        return {
+            key:'ageInfo',
+            val:{
+                age:20,
+                id:'121'
+            }
+        }
+    }
 }
 ```
 ```
@@ -234,6 +263,14 @@ class EmployeeValidator extends AgeValidator{
                 options:{min:2,max:10}
             },
         ]);
+    }
+
+    // It is recommended to use the build arrow function to solve the 'this' pointing problem
+    validateName = (vals)=>{
+        const ageInfo = vals.pool.ageInfo;
+        // or
+        const  ageInfo1 = this.get('pool.ageInfo');
+        // do some validate， If the validation fails, you only need to throw an error
     }
 }
 module.exports = {
@@ -263,6 +300,25 @@ router.get('/employee', async(ctx, next)=>{
 if your requestis  server.../employee?age=-128&name='yangjian'
 you will get the error message
 ![image](https://img-blog.csdnimg.cn/20201106144308625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl8zODA4MDU3Mw==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+## summary
+
+In all, the galaxy validate exposes the following API to the developer
+1. class GalaxyValidator:  This is inherited by the business-layer validator, which use the Rule in its constructor to register general validations, which are automatically retrieved by the self-validating function that precedes the 'validate'
+2. class Rule: Use Rule to register general validation in the GalaxyValidator constructor
+3. ctx.galaxy: The validator exposes the hook object on which some methods can be used
+    3.1 ctx.galaxy.get:  When you know the path of the variable, you can get the exact value by use this function. e.g: galaxy.get('query.name')、galaxy.get('path.name')、galaxy.get('header.name')、galaxy.get('body.name')、galaxy.get('pool.name').Gets the value of the name from the request parameter, path, request header, request body, and the data pool provided by Galaxy, respectively
+    3.2 ctx.galaxy.getValueInfo When the position of the parameter is uncertain (often encapsulating some method), only the key is known to use the method.
+        e.g: galaxy.getValueInfo('name');Variables are queried from the request header, the request body, the request path, and the request parameters. And returns the value of the variable and the specific path
+    3.3 ctx.galaxy.getAssembleParams: Assemble the request header, request body, request path, request parameters, and all values in the Galaxy datapool 
+
+### galaxy api
+| function name                |  params                                      |   return value  | description    |
+|------------------------------|----------------------------------------------|-------------------------------------|------------|
+| ctx.galaxy.get               | (path, boolean)                              | The value of the variable | you know the path of the parameter in the request, Boolean defaults true to a reasonable value and false to the original value |
+| ctx.galaxy.getValueInfo      | key | {value:The value of the variable,path:The path of the variable in the request} | This method can be used if the parameter path is uncertain (mostly for encapsulation of tool libraries)|
+| ctx.galaxy.getAssembleParams | null | {header,body, path, query, pool}      | assemble the request header, request body, request path, request parameters, and all values in the Galaxy datapool  |
 
 
 ## demo online

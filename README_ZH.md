@@ -41,6 +41,10 @@ router.get('/user', async(ctx, next)=>{
         const galaxy = await new UidValidator().validate(ctx);
         console.log(galaxy.get('query.uid'));
         console.log(ctx.galaxy.get('pool.pageInfo'));
+         // 从请求中聚合所有的请求参数
+         const assembleParams = ctx.galaxy.getAssembleParams();
+         // 如果你并不确定遍历的具体路径，而只知道对应的key，使用 getValueInfo 即可查看对应的值和路径
+         const name = ctx.galaxy.getValueInfo('name');
     } catch (error) {
         console.log(error)
     }
@@ -86,6 +90,16 @@ class UidValidator extends GalaxyValidator{
 ```
 如上面的登记方式，在构造函数中登记了this.uid的规则，galaxy就会对uid验证，看是否符合下面Rule中的各种规则，需要注意的是，如果其中有一条不符合，就不会验证下面的规则(自定义验证函数会验证)，比如上面需要uid是必需的，为数字，而且长度在5-10之间，如果通过第一条就会接着验证是否为数字，如果不是数字，就不会验证当前的长度是否是5-10之间了
 对于开发者而言，往往不需要特别关注uid的值是从哪儿来的，因为galaxy会自己去请求的(body、query、path、header)中去寻找，这也极大的方便了开发者的使用。只要关注我的参数需要符合什么条件即可，其余的都交给galaxy吧。
+
+#### api
+| params   |  type    |    value                            | description    |
+|----------|----------|-------------------------------------|------------|
+| required | boolean   |    true/false                      | 该字段是否是必须字段 |
+| message  | string   |    'error parameter'                | 验证失败时提示的错误信息 |
+| type     | string   |    参考 validator 验证类型 + ['isString', 'isObject', 'isArray'] 三种数据类型的验证| 验证类别 |
+| options  | string   |    参考 validator 对应options               | 传递给validator的配置 |
+
+[package validate](https://www.npmjs.com/package/validator)
 
 #### 校验规则本身
 如一开始提到的galaxy的特点之一，galaxy会对校验规则本身进行一个校验。大多数校验器可能会忽略这一点，但在galaxy中会在对参数值校验之前先对校验规则本身进行校验，比如required传入的不是布尔值，或者被配置多次，都会在控制台比较友好的红色打出相关信息，但你的服务不会挂掉，会以error的形式告知开发者，例如require被设置了两次都是true，这种写法可能不好，但也很难说是错的。会告知开发者，但服务不会因此而挂掉。
@@ -195,6 +209,22 @@ class AgeValidator extends GalaxyValidator{
             }
         ])
     }
+
+    // 异步验证只需要加async即可    
+    validateAge = (vals)=>{
+        const age = vals.query.age;
+        if('验证不通过'){
+            throw new Error('年纪验证不通过')
+        }
+        // 验证通过，并将ageInfo挂载在galaxy提供的数据池中，以便于其他需要的地方获取
+        return {
+            key:'ageInfo',
+            val:{
+                age:20,
+                id:'121'
+            }
+        }
+    }
 }
 ```
 上面的验证只是针对年龄，可能很多地方都会用到，可以作为一个基类提供给其他类继承，例如：
@@ -215,6 +245,14 @@ class EmployeeValidator extends AgeValidator{
                 options:{min:2,max:10}
             },
         ]);
+    }
+
+    // 推荐使用箭头函数，以解决this指向问题
+    validateName = (vals)=>{
+        const ageInfo = vals.pool.ageInfo;
+        // or
+        const  ageInfo1 = this.get('pool.ageInfo');
+        // 做一些自定义的业务验证，如果错误，只需要抛出一个error即可
     }
 }
 module.exports = {
@@ -253,12 +291,30 @@ router.get('/employee', async(ctx, next)=>{
 ### 失败
 如果失败，galaxy会将失败详情以一个数组的形式返回给业务层，由业务层决定如何处理。
 
-| params  |  type    |    value                            | explain    |
+| params  |  type    |    value                            | description    |
 |---------|----------|-------------------------------------|------------|
 | type    | string   |    value/function                   | 错误的信息是使用Rule校验出错，还是自定义函数验证出错 |
 | filed   | string   |    the parameter/function name      | 验证失败的字段名/自定义函数名 |
 | message | string   |    Error message description        | 错误详情 |
+| path    | string   |    like: "query.age"                | 如果是字段, 暴露错误参数位置，自定义函数校验错误则为 null |
 
+
+## 总结
+galaxy 总共对外暴露了如下的api
+1. GalaxyValidator 供业务层校验器继承使用，在其构造函数中使用Rule登记常规验证，validate打头的自定函数会自动取验证
+2. Rule 在 GalaxyValidator构造函数中使用Rule登记常规验证
+3. ctx.galaxy 校验器暴露出来的钩子对象在上面有一些方法可被使用
+    3.1 ctx.galaxy.get  当知道变量的路径就可以准确的获取被处理之后的值 galaxy.get('query.name')、galaxy.get('path.name')、galaxy.get('header.name')、galaxy.get('body.name')、galaxy.get('pool.name')分别从请求参数、路径、请求头、请求体以及galaxy提供的数据池上获取name
+    3.2 ctx.galaxy.getValueInfo 当不确定参数的位置(往往在封装一些方法)的时候，只知道key可以使用该方法。
+        例如 galaxy.getValueInfo('name');会分别从请求头、请求体、请求路径、以及请求参数四个地方查询对应的变量。并返回变量的值和具体路径
+    3.3 ctx.galaxy.getAssembleParams 聚合请求头、请求体、请求路径、请求参数以及galaxy数据池中的所有值  
+
+### galaxy api
+| function name                |  params                                      |   return value  | description    |
+|------------------------------|----------------------------------------------|-------------------------------------|------------|
+| ctx.galaxy.get               | (path, boolean)                              | 变量对应的值 | 确定参数在请求中的路径，就使用这个办法，boolean默认true获取合理的值，false获取原始的值 |
+| ctx.galaxy.getValueInfo      | key | {value:变量的值,path:变量在请求中的路径} | 如果参数路径不确定就可以使用该方法，多用于工具库的封装|
+| ctx.galaxy.getAssembleParams | null | {header,body, path, query, pool}      | 聚合请求头、请求体、请求路径、请求参数以及galaxy数据池中的所有值  |
 
 ## demo online
 https://codesandbox.io/s/galaxy-validator-7ml16?file=/src/index.js
@@ -270,6 +326,3 @@ https://codesandbox.io/s/galaxy-validator-7ml16?file=/src/index.js
 
 2. 在自定义验证函数的部分，最好使用箭头函数，以解决 'this' 的指向问题，这样使用 getValueInfo， get更加方便
 
-3. 错误返回信息中，添加 path，用于描述验证失败的字段位于请求体的位置
-
-4. 自定义验证的isSting, isArray 可以加一个min,max的长度的验证
