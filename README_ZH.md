@@ -304,10 +304,10 @@ galaxy 总共对外暴露了如下的api
 1. GalaxyValidator 供业务层校验器继承使用，在其构造函数中使用Rule登记常规验证，validate打头的自定函数会自动取验证
 2. Rule 在 GalaxyValidator构造函数中使用Rule登记常规验证
 3. ctx.galaxy 校验器暴露出来的钩子对象在上面有一些方法可被使用
-    3.1 ctx.galaxy.get  当知道变量的路径就可以准确的获取被处理之后的值 galaxy.get('query.name')、galaxy.get('path.name')、galaxy.get('header.name')、galaxy.get('body.name')、galaxy.get('pool.name')分别从请求参数、路径、请求头、请求体以及galaxy提供的数据池上获取name
-    3.2 ctx.galaxy.getValueInfo 当不确定参数的位置(往往在封装一些方法)的时候，只知道key可以使用该方法。
+    + ctx.galaxy.get  当知道变量的路径就可以准确的获取被处理之后的值 galaxy.get('query.name')、galaxy.get('path.name')、galaxy.get('header.name')、galaxy.get('body.name')、galaxy.get ('pool.name')分别从请求参数、路径、请求头、请求体以及galaxy提供的数据池上获取name
+    + ctx.galaxy.getValueInfo 当不确定参数的位置(往往在封装一些方法)的时候，只知道key可以使用该方法。
         例如 galaxy.getValueInfo('name');会分别从请求头、请求体、请求路径、以及请求参数四个地方查询对应的变量。并返回变量的值和具体路径
-    3.3 ctx.galaxy.getAssembleParams 聚合请求头、请求体、请求路径、请求参数以及galaxy数据池中的所有值  
+    + ctx.galaxy.getAssembleParams 聚合请求头、请求体、请求路径、请求参数以及galaxy数据池中的所有值  
 
 ### galaxy api
 | function name                |  params                                      |   return value  | description    |
