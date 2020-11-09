@@ -48,7 +48,7 @@ export default class GalaxyValidator {
         } else {
             log(
                 chalk.red(
-                    chalk.underline.bold(`ctx.${hook}已近被占，请换一个变量`),
+                    chalk.underline.bold(`ctx.${hook}is nearly occupied, please change a variable`),
                 ),
             )
         }
@@ -91,7 +91,7 @@ export default class GalaxyValidator {
         } catch (error) {
             result = new RuleResult(
                 false,
-                error.message || `自定义${customFun.name}方法验证失败`,
+                error.message || `Custom ${customFun.name} method validation failed`,
             )
         }
         return result
@@ -113,8 +113,8 @@ export default class GalaxyValidator {
                 key,
                 isValidateCustomFunc,
             )
+            const valInfo = this.getValueInfo(key);
             if (result.passed) {
-                const valInfo = this.getValueInfo(key);
                 _.set(
                     this.parsedData,
                     valInfo.path,
@@ -125,6 +125,7 @@ export default class GalaxyValidator {
                     type: isValidateCustomFunc ? 'function' : 'value',
                     filed: key,
                     message: result.message,
+                    path: isValidateCustomFunc ? null : valInfo.path.join('.')
                 })
             }
         }

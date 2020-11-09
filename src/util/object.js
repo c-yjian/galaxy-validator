@@ -2,7 +2,7 @@
 class RuleException extends Error {
     constructor(message, errorCode, code) {
         super()
-        this.message = message || '参数校验规则错误'
+        this.message = message || 'Error in parameter validation rule'
         this.errorCode = errorCode || -500
         this.code = code || 500
     }

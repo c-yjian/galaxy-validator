@@ -7,7 +7,7 @@ const chalk = require('chalk')
 
 const { log } = console
 const validateRuleTxt = `
-校验规则请输入数组格式like:
+Enter array format for validation rules, like:
     [
         {required:Boolean, message:'show txt while it failed '},
         {type:'isInt', message:'show txt while it failed '},
@@ -27,7 +27,7 @@ export default class Rule {
         // 其他的参数配置
         this.options = options
         try {
-            this.validateRuleList()
+            this._validateRuleList()
         } catch (error) {
             log(
                 chalk.red(
@@ -39,7 +39,7 @@ export default class Rule {
     }
 
     // 校验登记的规则有无错误
-    validateRuleList() {
+    _validateRuleList() {
         const { ruleList } = this
 
         if (Array.isArray(ruleList)) {
@@ -105,7 +105,7 @@ export default class Rule {
     }
 
     // 验证单个的规则
-    validateRuleItem(rule) {
+    _validateRuleItem(rule) {
         const { type, message, options } = rule
         let validateRes = false
         if (patchValiteType.includes(type)) {
@@ -119,7 +119,7 @@ export default class Rule {
         }
         return validateRes
             ? new RuleResult(true, '')
-            : new RuleResult(false, message || '参数错误')
+            : new RuleResult(false, message || 'parameter error')
     }
 
     validate(value) {
@@ -137,7 +137,7 @@ export default class Rule {
                 // 验证某一个字段不符合某一个规则就直接返回不再接着验证下面的规则
                 return new RuleResultWithValue(
                     false,
-                    ruleWithRequired.message || '字段是必填参数',
+                    ruleWithRequired.message || 'Fields are required parameters',
                 )
             }
             // 空值非必需，就直接通过判断，如果有值则要满足其他条件
@@ -145,7 +145,7 @@ export default class Rule {
         }
 
         for (const rule of ruleWithTypeList) {
-            const validateRes = this.validateRuleItem(rule)
+            const validateRes = this._validateRuleItem(rule)
             // 验证挂了， 验证某一个字段不符合某一个规则就直接返回不再接着验证下面的规则
             if (!validateRes.passed) {
                 return new RuleResultWithValue(false, validateRes.message)
