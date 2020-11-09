@@ -39,9 +39,11 @@ router.get('/employee', async(ctx, next)=>{
         const galaxy = await new EmployeeValidator().validate(ctx);
         const age = galaxy.get('query.age');
         const name = galaxy.get('query.name');
-        console.log(JSON.stringify(ctx.galaxy.getAssembleParams()));
+        console.log(typeof age)
+        console.log(typeof ctx.query.age)
         ctx.body =`
         age: ${age}
+        age1: ${ctx.query.age}
         name: ${name}
         `;
     } catch (error) {

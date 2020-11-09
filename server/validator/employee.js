@@ -46,7 +46,7 @@ class EmployeeValidator extends AgeValidator{
         ]);
     }
     validateName = (vals)=>{
-        console.log(JSON.stringify(vals));
+        // console.log(JSON.stringify(vals));
     }
 }
 

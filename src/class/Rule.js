@@ -86,7 +86,7 @@ export default class Rule {
     // js语言中将传递过来的int转为了数字字符串
     // 通过验证之后再转回去，比如传入的id是int，通过验证之后
     // 将 '2'转为2存储在this.parsedData中
-    convertValue() {
+    _convertValue() {
         const { value } = this
         const ruleWithTypeList = this.ruleList.filter((rule) => rule.type)
         for (const rule of ruleWithTypeList) {
@@ -152,6 +152,7 @@ export default class Rule {
             }
         }
         // all passed
-        return new RuleResultWithValue(true, '', this.convertValue())
+        const convertVal = this._convertValue();
+        return new RuleResultWithValue(true, '', convertVal);
     }
 }

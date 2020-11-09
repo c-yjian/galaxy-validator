@@ -107,14 +107,20 @@ export default class GalaxyValidator {
         const member2ValidateKeyList = extractAttributesFromInstance(this, {
             filter: this._filterParams2Validate.bind(this),
         })
-        console.log(JSON.stringify(member2ValidateKeyList));
         for (const key of member2ValidateKeyList) {
             const isValidateCustomFunc = typeof this[key] === 'function'
             const result = await this._validateRuleByKey(
                 key,
                 isValidateCustomFunc,
             )
-            if (!result.passed) {
+            if (result.passed) {
+                const valInfo = this.getValueInfo(key);
+                _.set(
+                    this.parsedData,
+                    valInfo.path,
+                    result.convertValue
+                );
+            }else{
                 errorList.push({
                     type: isValidateCustomFunc ? 'function' : 'value',
                     filed: key,
