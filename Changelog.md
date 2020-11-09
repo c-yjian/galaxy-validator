@@ -1,4 +1,4 @@
-# 1.1.0 (2020-11-06)
+## 1.2.1 (2020-11-09)
 
 
 ### Bug Fixes
@@ -9,10 +9,6 @@
 ### Features
 
 * **init:** init the project ([bae1b28](https://github.com/yangJianWeb/galaxy-validator/commit/bae1b283389fadca6defc48b8e7a67bf1b7dfbcd))
-
-
-
-# 1.0.0 (2020-11-05)
 
 
 

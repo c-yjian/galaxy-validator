@@ -258,9 +258,7 @@ router.get('/employee', async(ctx, next)=>{
 | type    | string   |    value/function                   | 错误的信息是使用Rule校验出错，还是自定义函数验证出错 |
 | filed   | string   |    the parameter/function name      | 验证失败的字段名/自定义函数名 |
 | message | string   |    Error message description        | 错误详情 |
-| options | object   |     null                            |  validate包中options的配置 |
 
 
 ## demo online
 https://codesandbox.io/s/galaxy-validator-7ml16?file=/src/index.js
-
