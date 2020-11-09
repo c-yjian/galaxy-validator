@@ -308,10 +308,10 @@ In all, the galaxy validate exposes the following API to the developer
 1. class GalaxyValidator:  This is inherited by the business-layer validator, which use the Rule in its constructor to register general validations, which are automatically retrieved by the self-validating function that precedes the 'validate'
 2. class Rule: Use Rule to register general validation in the GalaxyValidator constructor
 3. ctx.galaxy: The validator exposes the hook object on which some methods can be used
-    3.1 ctx.galaxy.get:  When you know the path of the variable, you can get the exact value by use this function. e.g: galaxy.get('query.name')、galaxy.get('path.name')、galaxy.get('header.name')、galaxy.get('body.name')、galaxy.get('pool.name').Gets the value of the name from the request parameter, path, request header, request body, and the data pool provided by Galaxy, respectively
-    3.2 ctx.galaxy.getValueInfo When the position of the parameter is uncertain (often encapsulating some method), only the key is known to use the method.
+    1. ctx.galaxy.get:  When you know the path of the variable, you can get the exact value by use this function. e.g: galaxy.get('query.name')、galaxy.get('path.name')、galaxy.get('header.name')、galaxy.get('body.name')、galaxy.get('pool.name').Gets the value of the name from the request parameter, path, request header, request body, and the data pool provided by Galaxy, respectively
+    2. ctx.galaxy.getValueInfo When the position of the parameter is uncertain (often encapsulating some method), only the key is known to use the method.
         e.g: galaxy.getValueInfo('name');Variables are queried from the request header, the request body, the request path, and the request parameters. And returns the value of the variable and the specific path
-    3.3 ctx.galaxy.getAssembleParams: Assemble the request header, request body, request path, request parameters, and all values in the Galaxy datapool 
+    3. ctx.galaxy.getAssembleParams: Assemble the request header, request body, request path, request parameters, and all values in the Galaxy datapool 
 
 ### galaxy api
 | function name                |  params                                      |   return value  | description    |
